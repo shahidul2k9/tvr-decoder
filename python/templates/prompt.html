@@ -1,0 +1,72 @@
+<html>
+<head>
+    <script type="text/javascript">
+
+    if( !window.XMLHttpRequest ) XMLHttpRequest = function()
+    {
+      try{ return new ActiveXObject("Msxml2.XMLHTTP.6.0") }catch(e){}
+      try{ return new ActiveXObject("Msxml2.XMLHTTP.3.0") }catch(e){}
+      try{ return new ActiveXObject("Msxml2.XMLHTTP") }catch(e){}
+      try{ return new ActiveXObject("Microsoft.XMLHTTP") }catch(e){}
+      throw new Error("Could not find an XMLHttpRequest alternative.")
+    };
+
+    function $(id){
+      return document.getElementById(id);
+    }
+
+    function doDecode() {
+      var req = new XMLHttpRequest();
+      req.open('GET', '/decode/' + $('tag_field').value + '/' + $('value_field').value, true);
+        req.onreadystatechange = function() {
+          if(req.readyState == 4 && req.status == 200) {
+            $('display').innerHTML = req.responseText;
+          }
+        }
+
+      // Make the actual request
+      req.send(null);
+    }
+
+    var maxLengths = {
+        {% for tag in tags %}
+        '{{ tag.acronym }}': {{ tag.field_length }},
+        {% endfor %}
+    }
+
+    function setMaxLength() {
+        var value_field = $('value_field')
+        var maxLength = maxLengths[$('tag_field').value]
+        value_field.maxLength = maxLength
+        if(value_field.value.length > maxLength) {
+            value_field.value = value_field.value.substr(0, maxLength)
+        }
+    }
+
+    </script>
+</head>
+<body onload="setMaxLength()">
+    <form onsubmit="doDecode();return false">
+    <select id="tag_field" onchange="setMaxLength()">
+    {% for tag in tags %}
+        <option value="{{ tag.acronym }}">{{ tag.acronym }}</option>
+    {% endfor %}
+    </select>
+    <input type="text" id="value_field"/>
+    <input type="submit" value="Decode"/>
+    </form>
+    <div id="errors">
+    </div>
+    <div id="display">
+    </div>
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    try {
+    var pageTracker = _gat._getTracker("UA-7717677-1");
+    pageTracker._trackPageview();
+    } catch(err) {}</script>
+</body>
+</html>
